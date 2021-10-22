@@ -20,51 +20,78 @@ class App:
 
         self.clock = pygame.time.Clock()
         self.fps = 60
+        self.dt = 0
 
-        self.ball = None
+        self.balls = []
 
         self.vel = None
         self.showVel = False
+
+        self.ballindex = 0
 
         # Constants
         self.frictionIntensity = 0.2
         self.g = 9.81
 
     def start(self):
-        self.ball = Ball(np.array([600, 300], dtype="float"), 10, np.array([0, 0], dtype="float"), 15)
+
+        for i in range(5):
+            self.balls.append(Ball(
+                np.array([np.random.randint(35, self.width - 35), np.random.randint(35, self.width - 35)],
+                         dtype="float"), 10, np.array([0, 0], dtype="float"), 15))
 
     def update(self):
+        self.dt = self.clock.get_time() / 1000
         self.clock.tick(self.fps)
-        if distance(self.mousePos, self.ball.pos) <= self.ball.rad:
-            self.ball.selected = True
-        else:
-            self.ball.selected = False
 
-        if self.mouseDown and self.ball.selected:
-            self.vel = self.ball.pos
-            self.showVel = True
-        if self.vel is not None and self.mouseUp:
-            self.ball.vel = (self.vel - self.mousePos) * 10
+        for i in range(len(self.balls)):
+            ball = self.balls[i]
+            if distance(self.mousePos, ball.pos) <= ball.rad:
+                ball.selected = True
+            else:
+                ball.selected = False
 
-            self.vel = None
-            self.showVel = False
+            if self.mouseDown and ball.selected and self.vel is None:
+                self.vel = ball.pos
+                self.showVel = True
+                self.ballindex = i
+            if self.vel is not None and self.mouseUp and self.ballindex == i:
+                ball.vel = (self.vel - self.mousePos) * 10
 
-        # update ball
-        self.ball.update(self.clock.get_time() / 1000)
-        if self.ball.pos[0] + self.ball.rad >= self.width - 20:
-            self.ball.pos[0] = self.width - 20 - self.ball.rad
-            self.ball.vel[0] = - self.ball.vel[0]
-        elif self.ball.pos[0] - self.ball.rad <= 20:
-            self.ball.pos[0] = 20 + self.ball.rad
-            self.ball.vel[0] = - self.ball.vel[0]
-        if self.ball.pos[1] + self.ball.rad >= self.height - 20:
-            self.ball.vel[1] = - self.ball.vel[1]
-            self.ball.pos[1] = self.height - 20 - self.ball.rad
-        elif self.ball.pos[1] - self.ball.rad <= 20:
-            self.ball.vel[1] = - self.ball.vel[1]
-            self.ball.pos[1] = 20 + self.ball.rad
+                self.vel = None
+                self.showVel = False
 
-        self.ball.vel -= self.ball.vel / self.ball.mass * self.frictionIntensity * self.g
+            # update balls
+
+            ball.vel -= ball.vel / (self.frictionIntensity * self.g * 10)
+
+            for j in range(len(self.balls)):
+                if i != j:
+                    kickball = self.balls[j]
+                    if distance(ball.pos, kickball.pos) <= ball.rad + kickball.rad:
+                        self.balls[i].pos = self.balls[i].pos - self.dt * self.balls[i].vel
+
+                        self.balls[i].vel = -(kickball.mass * (kickball.vel - ball.vel) + ball.mass * ball.vel +
+                                             kickball.mass * kickball.vel) / (ball.mass + kickball.mass)
+                        self.balls[j].vel = -(ball.mass * (ball.vel - kickball.vel) + ball.mass * ball.vel +
+                                              kickball.mass * kickball.vel) / (ball.mass + kickball.mass)
+
+                        self.balls[i].vel = -self.balls[i].vel
+                        self.balls[j].vel = -self.balls[j].vel
+
+            ball.update(self.clock.get_time() / 1000)
+            if ball.pos[0] + ball.rad >= self.width - 20:
+                ball.pos[0] = self.width - 20 - ball.rad
+                ball.vel[0] = - ball.vel[0]
+            elif ball.pos[0] - ball.rad <= 20:
+                ball.pos[0] = 20 + ball.rad
+                ball.vel[0] = - ball.vel[0]
+            if ball.pos[1] + ball.rad >= self.height - 20:
+                ball.vel[1] = - ball.vel[1]
+                ball.pos[1] = self.height - 20 - ball.rad
+            elif ball.pos[1] - ball.rad <= 20:
+                ball.vel[1] = - ball.vel[1]
+                ball.pos[1] = 20 + ball.rad
 
     def render(self):
         self.window.fill((0, 0, 0))
@@ -76,8 +103,11 @@ class App:
         pygame.draw.rect(self.window, (255, 187, 0), (self.width - 20, 0, self.width, self.height))
 
         # draw ball(s)
-        if self.ball.selected:
-            pygame.draw.circle(self.window, (255, 255, 255), self.ball.pos, self.ball.rad+3)
+        for i in range(len(self.balls)):
+            if self.balls[i].selected:
+                pygame.draw.circle(self.window, (255, 255, 255), self.balls[i].pos, self.balls[i].rad + 3)
+
+            pygame.draw.circle(self.window, (255, 0, 0), self.balls[i].pos, self.balls[i].rad)
 
         if self.showVel:
             pygame.draw.line(self.window, (255, 255, 255), self.vel, self.mousePos, 2)
@@ -88,8 +118,6 @@ class App:
                 lp = lp + np.array([np.cos(ang) * 10, -np.sin(ang) * 10])
                 pygame.draw.line(self.window, (255, 255, 255), lps, lp, 2)
                 lp = lp + np.array([np.cos(ang) * 10, -np.sin(ang) * 10])
-
-        pygame.draw.circle(self.window, (255, 0, 0), self.ball.pos, self.ball.rad)
 
         # update window
         pygame.display.update()
