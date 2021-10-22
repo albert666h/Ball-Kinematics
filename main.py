@@ -53,7 +53,7 @@ class App:
         self.ball.update(self.clock.get_time() / 1000)
         if self.ball.pos[0] + self.ball.rad >= self.width - 20:
             self.ball.pos[0] = self.width - 20 - self.ball.rad
-            self.ball.vel = - self.ball.vel
+            self.ball.vel[0] = - self.ball.vel[0]
         elif self.ball.pos[0] - self.ball.rad <= 20:
             self.ball.pos[0] = 20 + self.ball.rad
             self.ball.vel[0] = - self.ball.vel[0]
