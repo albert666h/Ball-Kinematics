@@ -26,8 +26,12 @@ class App:
         self.vel = None
         self.showVel = False
 
+        # Constants
+        self.frictionIntensity = 0.2
+        self.g = 9.81
+
     def start(self):
-        self.ball = Ball(np.array([600, 300], dtype="float"), 10, np.array([0, 0], dtype="float"))
+        self.ball = Ball(np.array([600, 300], dtype="float"), 10, np.array([0, 0], dtype="float"), 15)
 
     def update(self):
         self.clock.tick(self.fps)
@@ -41,17 +45,26 @@ class App:
             self.showVel = True
         if self.vel is not None and self.mouseUp:
             self.ball.vel = (self.vel - self.mousePos) * 10
+
             self.vel = None
             self.showVel = False
 
         # update ball
         self.ball.update(self.clock.get_time() / 1000)
-        if self.ball.pos[0] >= self.width - 20 or self.ball.pos[0] <= 20:
+        if self.ball.pos[0] + self.ball.rad >= self.width - 20:
+            self.ball.pos[0] = self.width - 20 - self.ball.rad
+            self.ball.vel = - self.ball.vel
+        elif self.ball.pos[0] - self.ball.rad <= 20:
+            self.ball.pos[0] = 20 + self.ball.rad
             self.ball.vel[0] = - self.ball.vel[0]
-        if self.ball.pos[1] >= self.height - 20 or self.ball.pos[1] <= 20:
+        if self.ball.pos[1] + self.ball.rad >= self.height - 20:
             self.ball.vel[1] = - self.ball.vel[1]
+            self.ball.pos[1] = self.height - 20 - self.ball.rad
+        elif self.ball.pos[1] - self.ball.rad <= 20:
+            self.ball.vel[1] = - self.ball.vel[1]
+            self.ball.pos[1] = 20 + self.ball.rad
 
-        self.ball.vel -= self.ball.vel / 20
+        self.ball.vel -= self.ball.vel / self.ball.mass * self.frictionIntensity * self.g
 
     def render(self):
         self.window.fill((0, 0, 0))
@@ -68,6 +81,13 @@ class App:
 
         if self.showVel:
             pygame.draw.line(self.window, (255, 255, 255), self.vel, self.mousePos, 2)
+            lp = self.vel
+            for i in range(int(distance(self.mousePos, self.vel) / 20)):
+                ang = angle(self.mousePos, self.vel) * np.pi / 180
+                lps = lp
+                lp = lp + np.array([np.cos(ang) * 10, -np.sin(ang) * 10])
+                pygame.draw.line(self.window, (255, 255, 255), lps, lp, 2)
+                lp = lp + np.array([np.cos(ang) * 10, -np.sin(ang) * 10])
 
         pygame.draw.circle(self.window, (255, 0, 0), self.ball.pos, self.ball.rad)
 
