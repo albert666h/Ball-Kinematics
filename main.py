@@ -35,10 +35,10 @@ class App:
 
     def start(self):
 
-        for i in range(5):
+        for i in range(9):
             self.balls.append(Ball(
                 np.array([np.random.randint(35, self.width - 35), np.random.randint(35, self.width - 35)],
-                         dtype="float"), 10, np.array([0, 0], dtype="float"), 15))
+                         dtype="float"), 20, np.array([0, 0], dtype="float"), 15))
 
     def update(self):
         self.dt = self.clock.get_time() / 1000
@@ -68,16 +68,16 @@ class App:
             for j in range(len(self.balls)):
                 if i != j:
                     kickball = self.balls[j]
-                    if distance(ball.pos, kickball.pos) <= ball.rad + kickball.rad:
-                        self.balls[i].pos = self.balls[i].pos - self.dt * self.balls[i].vel
+                    d = distance(ball.pos, kickball.pos)
+                    if d <= ball.rad + kickball.rad:
 
-                        self.balls[i].vel = -(kickball.mass * (kickball.vel - ball.vel) + ball.mass * ball.vel +
+                        self.balls[i].pos = self.balls[i].pos - self.dt * \
+                                            (self.balls[i].vel * (1-d/(self.balls[i].rad + self.balls[j].rad)))
+
+                        self.balls[i].vel = (kickball.mass * (kickball.vel - ball.vel) + ball.mass * ball.vel +
                                              kickball.mass * kickball.vel) / (ball.mass + kickball.mass)
                         self.balls[j].vel = -(ball.mass * (ball.vel - kickball.vel) + ball.mass * ball.vel +
                                               kickball.mass * kickball.vel) / (ball.mass + kickball.mass)
-
-                        self.balls[i].vel = -self.balls[i].vel
-                        self.balls[j].vel = -self.balls[j].vel
 
             ball.update(self.clock.get_time() / 1000)
             if ball.pos[0] + ball.rad >= self.width - 20:
