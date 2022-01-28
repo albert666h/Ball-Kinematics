@@ -93,17 +93,17 @@ class App:
         self.window.fill((0, 0, 0))
 
         # Borders
-        pygame.draw.rect(self.window, (255, 187, 0), (0, 0, self.width, 20))
-        pygame.draw.rect(self.window, (255, 187, 0), (0, self.height - 20, self.width, 20))
-        pygame.draw.rect(self.window, (255, 187, 0), (0, 0, 20, self.height))
-        pygame.draw.rect(self.window, (255, 187, 0), (self.width - 20, 0, self.width, self.height))
+        pygame.draw.rect(self.window, (55, 55, 55), (0, 0, self.width, 20))
+        pygame.draw.rect(self.window, (55, 55, 55), (0, self.height - 20, self.width, 20))
+        pygame.draw.rect(self.window, (55, 55, 55), (0, 0, 20, self.height))
+        pygame.draw.rect(self.window, (55, 55, 55), (self.width - 20, 0, self.width, self.height))
 
         # draw ball(s)
         for i in range(len(self.balls)):
             if self.balls[i].selected:
                 pygame.draw.circle(self.window, (255, 255, 255), self.balls[i].pos, self.balls[i].rad + 3)
 
-            pygame.draw.circle(self.window, (255, 0, 0), self.balls[i].pos, self.balls[i].rad)
+            pygame.draw.circle(self.window, (255 - self.balls[i].mass * 10, self.balls[i].mass * 10, self.balls[i].mass * 10), self.balls[i].pos, self.balls[i].rad)
 
         if self.showVel:
             pygame.draw.line(self.window, (255, 255, 255), self.vel, self.mousePos, 2)
