@@ -38,7 +38,7 @@ class App:
         for i in range(9):
             self.balls.append(Ball(
                 np.array([np.random.randint(35, self.width - 35), np.random.randint(35, self.width - 35)],
-                         dtype="float"), 20, np.array([0, 0], dtype="float"), 15))
+                         dtype="float"), np.array([0, 0], dtype="float"), np.random.randint(5, 20)))
 
     def update(self):
         self.dt = self.clock.get_time() / 1000
@@ -72,8 +72,8 @@ class App:
                     if d <= ball.rad + kickball.rad:
                         vel = -kickball.pos + ball.pos
                         vel /= sum(np.sqrt(vel*vel))
-                        ball.vel += vel * sum(np.sqrt(ball.vel * ball.vel)) / 2
-                        kickball.vel -= vel * sum(np.sqrt(ball.vel * ball.vel)) / 2
+                        ball.vel += vel * sum(np.sqrt(ball.vel * ball.vel)) * kickball.mass / (ball.mass + kickball.mass)
+                        kickball.vel -= vel * sum(np.sqrt(ball.vel * ball.vel)) * ball.mass / (ball.mass + kickball.mass)
 
             ball.update(self.clock.get_time() / 1000)
             if ball.pos[0] + ball.rad >= self.width - 20:
