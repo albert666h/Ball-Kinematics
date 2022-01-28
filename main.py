@@ -70,14 +70,10 @@ class App:
                     kickball = self.balls[j]
                     d = distance(ball.pos, kickball.pos)
                     if d <= ball.rad + kickball.rad:
-
-                        self.balls[i].pos = self.balls[i].pos - self.dt * \
-                                            (self.balls[i].vel * (1-d/(self.balls[i].rad + self.balls[j].rad)))
-
-                        self.balls[i].vel = (kickball.mass * (kickball.vel - ball.vel) + ball.mass * ball.vel +
-                                             kickball.mass * kickball.vel) / (ball.mass + kickball.mass)
-                        self.balls[j].vel = -(ball.mass * (ball.vel - kickball.vel) + ball.mass * ball.vel +
-                                              kickball.mass * kickball.vel) / (ball.mass + kickball.mass)
+                        vel = -kickball.pos + ball.pos
+                        vel /= sum(np.sqrt(vel*vel))
+                        ball.vel += vel * sum(np.sqrt(ball.vel * ball.vel)) / 2
+                        kickball.vel -= vel * sum(np.sqrt(ball.vel * ball.vel)) / 2
 
             ball.update(self.clock.get_time() / 1000)
             if ball.pos[0] + ball.rad >= self.width - 20:
