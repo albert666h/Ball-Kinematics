@@ -72,8 +72,8 @@ class App:
                     if d <= ball.rad + kickball.rad:
                         vel = -kickball.pos + ball.pos
                         vel /= sum(np.sqrt(vel*vel))
-                        ball.vel += vel * d * kickball.mass / (ball.mass + kickball.mass)
-                        kickball.vel -= vel * d * ball.mass / (ball.mass + kickball.mass)
+                        ball.vel += vel * np.sqrt(sum(ball.vel * ball.vel)) * kickball.mass / (ball.mass + kickball.mass)
+                        kickball.vel -= vel * np.sqrt(sum(ball.vel * ball.vel)) * ball.mass / (ball.mass + kickball.mass)
 
             ball.update(self.clock.get_time() / 1000)
             if ball.pos[0] + ball.rad >= self.width - 20:
