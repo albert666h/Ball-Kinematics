@@ -19,7 +19,7 @@ class App:
         self.run = True
 
         self.clock = pygame.time.Clock()
-        self.fps = 60
+        self.fps = 240
         self.dt = 0
 
         self.balls = []
@@ -56,14 +56,14 @@ class App:
                 self.showVel = True
                 self.ballindex = i
             if self.vel is not None and self.mouseUp and self.ballindex == i:
-                ball.vel = (self.vel - self.mousePos) * 10
+                ball.vel = (self.vel - self.mousePos) * 3
 
                 self.vel = None
                 self.showVel = False
 
             # update balls
 
-            ball.vel -= ball.vel / (self.frictionIntensity * self.g * 10)
+            ball.vel -= ball.vel * (self.frictionIntensity * self.g) * self.dt
 
             for j in range(len(self.balls)):
                 if i != j:
